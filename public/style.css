@@ -1,0 +1,11 @@
+body {
+	padding:0 30px 30px 30px;
+}
+
+.tab-pane{
+	padding:20px 0;
+}
+
+.form-group input{
+	margin: 0 10px;
+}
