@@ -3,8 +3,6 @@ const app 			= module.exports = express();
 var mongoose 		= require('mongoose');
 mongoose.Promise	= global.Promise;
 
-mongoose.connect('mongodb://localhost/tasks');
-
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function(){
@@ -18,18 +16,22 @@ db.once('open', function(){
 
 	app.get('/', function(req, res) {
 		user.find(function(err, doc){
-			send(res, err, doc); 
+			if (err){
+				console.log("Ошибка получения списка пользователей: " + err);
+				send(res, new Error("Ошибка получения списка пользователей: " + err));
+			}else{
+				send(res, err, doc); 
+			}
 		});
-		
 	});
 
 	app.post('/', function(req, res) {
-		if (req.body.name){
+		if (req.body.name && req.body.name != ""){
 			var newUser = new user({ name: req.body.name});
 			newUser.save(function (err, newUser) {
 				if (err){
-					console.log("Что-то не так с пользователем" + newUser.name);
-					send(res, new Error("Что-то не так с пользователем" + newUser.name));
+					console.log("Что-то не так с пользователем " + newUser.name);
+					send(res, new Error("Что-то не так с пользователем " + newUser.name));
 				}else{
 					console.log("Добавлен: " + newUser.name);
 					send(res, err, newUser);
@@ -41,8 +43,7 @@ db.once('open', function(){
 	});
 	
 	app.put('/:id', function(req, res) {
-		res.status(200).json(req.body.name);
-		/*if (req.body && req.params.id && req.body.name){
+		if (req.body && req.params.id && req.body.name){
 			user.findByIdAndUpdate(req.params.id, { $set: { name: req.body.name }}, { new: true }, function (err, doc) {
 				if (err) return send(res, new Error("Ошибка редактирования"));
 				console.log("Обновление: ", doc);
@@ -51,13 +52,17 @@ db.once('open', function(){
 
 		}else {
 			send(res, new Error("Не все параметры"));
-		}*/
+		}
 	});
 
 	app.delete('/:id', function(req, res) {
-		/*users.findAndRemove({ _id: new mongodb.ObjectID(req.params.id) }, (err, result) => {
-			send(res, err, result);
-		});*/
+		if (req.params.id){
+			user.remove({_id: req.params.id}, function(err, doc){
+				if (err) return send(res, new Error("Ошибка удаления"));
+				console.log("Удаление: ", req.params.id);
+				send(res, err, doc);
+			});			
+		}
 	});
 
 	app.use(function(err, req, res, next) {
