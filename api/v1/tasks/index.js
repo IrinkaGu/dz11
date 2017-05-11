@@ -11,16 +11,17 @@ db.once('open', function(){
 	var Schema = mongoose.Schema;
 	
 	var taskSchema = new Schema({
-		name: String,
-		desc: String,
+		name: { type: [String], index:true},
+		desc: { type: [String], index:true},
 		isopen: Boolean,
 		user: String
 	});
-	
+
 	var task = mongoose.model('task', taskSchema);
 
 	app.get('/', function(req, res) {
-		task.find(function(err, doc){
+		var filter = (req.query.find) ? {'$text':{'$search':req.query.find}} : {};
+		task.find(filter,function(err, doc){
 			if (err){
 				console.log("Ошибка получения списка задач: " + err);
 				send(res, new Error("Ошибка получения списка задач: " + err));

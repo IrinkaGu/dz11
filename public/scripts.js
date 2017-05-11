@@ -2,29 +2,29 @@ var API_URL_USERS = '/api/v1/users/';
 var API_URL_TASKS = '/api/v1/tasks/';
 
 $(document).ready(function(){
-	getList("taskList", API_URL_TASKS);	
-	getList("userList", API_URL_USERS);
+    getList("taskList", API_URL_TASKS);
+    getList("userList", API_URL_USERS);
 
-	//пользователи	
-	$("#addForm").submit(function(event) {
+    //РїРѕР»СЊР·РѕРІР°С‚РµР»Рё
+    $("#addForm").submit(function(event) {
         event.preventDefault();
         if ($(this).find("input").val().trim() != ""){
-			var posting = $.post(API_URL_USERS,  $(this).serialize());
-			posting.done(function(data) {
-				alert(`“спешно добавлено - ${JSON.stringify(data.name)}`);
-				appendElement("userList", data);
-				$("#addForm #name").val('');
-			}).fail(function( jqxhr, textStatus, error ) {
-				var err = textStatus + ", " + error;
-				alert("Ћшибка добавлениЯ: " + err);
-			});
-		} else {
-			alert("Џустое имЯ");
-			$("#addForm #name").val('');
-		}
+            var posting = $.post(API_URL_USERS,  $(this).serialize());
+            posting.done(function(data) {
+                alert(`РЈСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅРѕ - ${JSON.stringify(data.name)}`);
+                appendElement("userList", data);
+                $("#addForm #name").val('');
+            }).fail(function( jqxhr, textStatus, error ) {
+                var err = textStatus + ", " + error;
+                alert("РћС€РёР±РєР° РґРѕР±Р°РІР»РµРЅРёСЏ: " + err);
+            });
+        } else {
+            alert("РџСѓСЃС‚РѕРµ РёРјСЏ");
+            $("#addForm #name").val('');
+        }
     });
-	
-	$(document).on('click', '.deleteUser', (e) => {
+
+    $(document).on('click', '.deleteUser', (e) => {
         e.preventDefault();
         var id = e.target.id.substr(11);
         deleteUser(id, () => {
@@ -37,63 +37,71 @@ $(document).ready(function(){
         var id = e.target.id.substr(11);
         updateUser(id, $(e.target).parents('tr'));
     });
-	//задачи
-	$(document).on('click', '#addTask', function (){
-		$(".add_task").toggle("slow");
-	});
 	
-	$("#addTaskForm").submit(function(event) {
-        event.preventDefault();
-		var posting = $.post(API_URL_TASKS,  $(this).serialize());
-		posting.done(function(data) {
-			alert(`“спешно добавлена задача - ${JSON.stringify(data)}`);
-			appendElement("taskList",data);
-		}).fail(function( jqxhr, textStatus, error ) {
-			var err = textStatus + ", " + error;
-			alert("Ћшибка добавлениЯ: " + err);
-		});
+    //Р·Р°РґР°С‡Рё
+    $(document).on('click', '#addTask', function (){
+        $(".add_task").toggle("slow");
     });
-	
-	$(document).on('click', '.deleteTask', (e) => {
+
+    $("#addTaskForm").submit(function(event) {
+        event.preventDefault();
+        var posting = $.post(API_URL_TASKS,  $(this).serialize());
+        posting.done(function(data) {
+            alert(`РЈСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅР° Р·Р°РґР°С‡Р° - ${JSON.stringify(data)}`);
+            appendElement("taskList",data);
+        }).fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            alert("РћС€РёР±РєР° РґРѕР±Р°РІР»РµРЅРёСЏ: " + err);
+        });
+    });
+
+    $(document).on('click', '.deleteTask', (e) => {
         e.preventDefault();
         var id = e.target.id.substr(11);
         deleteTask(id, () => {
             $(e.target).parents('tr').remove();
         })
     });
-	
-	$(document).on('click', '.updateTask', (e) => {
+
+    $(document).on('click', '.updateTask', (e) => {
         e.preventDefault();
         var id = e.target.id.substr(11);
         updateTask(id, $(e.target).parents('tr'));
     });
+
+    $("#editTaskForm").submit(function(event) {
+        name = $(this).find("#name").val();
+        desc = $(this).find("#desc").val();
+        if ($(this).find("#open:checked")){
+            var open = true;
+        } else {var open = false;};
+        user = $(this).find("#user").val();
+
+        $.ajax({
+            url: API_URL_TASKS + $("#editTaskForm #id").val(),
+            method: 'put',
+            contentType: 'application/json',
+            data: JSON.stringify({name:name, desc: desc, open:open, user:user})
+        }).done(function(data) {
+            alert(`РЈСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅРѕ - ${JSON.stringify(data)}`);
+            location.reload();
+        }).fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            alert( "OС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ: " + err );
+        });
+        return false;
+    });
 	
-	$("#editTaskForm").submit(function(event) {
-		name = $(this).find("#name").val();
-		desc = $(this).find("#desc").val();
-		if ($(this).find("#open:checked")){
-			var open = true;
-		} else {var open = false;};
-		user = $(this).find("#user").val();
-	
-		$.ajax({
-			url: API_URL_TASKS + $("#editTaskForm #id").val(),
-			method: 'put',
-			contentType: 'application/json',
-			data: JSON.stringify({name:name, desc: desc, open:open, user:user})
-		}).done(function(data) {
-			alert(`“спешно обновлено - ${JSON.stringify(data)}`);
-			location.reload();
-		}).fail(function( jqxhr, textStatus, error ) {
-			var err = textStatus + ", " + error;
-			alert( "Oшибка обновлениЯ: " + err );
-		});
-		return false;
-	});
+	//РїРѕРёСЃРє
+	$( "#searchForm" ).submit(function( event ) {
+        event.preventDefault();
+		var find = $(this).find("#desc" ).val();
+        getList("taskList", API_URL_TASKS, find);
+    });
 });
 
 function getList(idPanel, url, find){
-	$("#"+idPanel+" #elementTable tbody").empty();
+    $("#"+idPanel+" #elementTable tbody").empty();
     $.getJSON(url, (find) ? {find: find} : {})
         .done(function(elements) {
             $.each(elements, function(i, element) {
@@ -102,49 +110,49 @@ function getList(idPanel, url, find){
         })
         .fail(function( jqxhr, textStatus, error ) {
             var err = textStatus + ", " + error;
-            $("#"+idPanel).html("Ћшибка запроса: " + err);
+            $("#"+idPanel).html("РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР°: " + err);
         });
 }
 
 function appendElement(idPanel, element) {
-	if (element.desc){
-		task = element;
-		if (task._id){
-			if(task.isopen) {var isopen = "Ћткрыта"} else {var isopen = "‡акрыта"};
-			$("#"+idPanel+" #elementTable").append(`<tr> <th scope="row">${task._id}</th>
+    if (element.desc){
+        task = element;
+        if (task._id){
+            if(task.isopen) {var isopen = "РћС‚РєСЂС‹С‚Р°"} else {var isopen = "Р—Р°РєСЂС‹С‚Р°"};
+            $("#"+idPanel+" #elementTable").append(`<tr> <th scope="row">${task._id}</th>
 							<td class="name">${task.name}</td>
 							<td class="desc">${task.desc}</td>
 							<td class="isopen">${isopen}</td>
 							<td class="user">${task.user}</td>
-							<td><a class="updateTask" href="#" id="userUpdate-${task._id}">ђедактировать</a></td>
-							<td><a class="deleteTask" href="#" id="userDelete-${task._id}">“далить</a></td>
+							<td><a class="updateTask" href="#" id="userUpdate-${task._id}">Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ</a></td>
+							<td><a class="deleteTask" href="#" id="userDelete-${task._id}">РЈРґР°Р»РёС‚СЊ</a></td>
 						</tr>`);
-		}
-	} else {
-		user = element;
-		if (user._id){
-			$("#"+idPanel+" #elementTable").append(`<tr> <th scope="row">${user._id}</th>
+        }
+    } else {
+        user = element;
+        if (user._id){
+            $("#"+idPanel+" #elementTable").append(`<tr> <th scope="row">${user._id}</th>
 							<td><input type="text" name="name" value="${user.name}"/></td>
-							<td><a class="updateUser" href="#" id="userUpdate-${user._id}">ђедактировать</a></td>
-							<td><a class="deleteUser" href="#" id="userDelete-${user._id}">“далить</a></td>
+							<td><a class="updateUser" href="#" id="userUpdate-${user._id}">Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ</a></td>
+							<td><a class="deleteUser" href="#" id="userDelete-${user._id}">РЈРґР°Р»РёС‚СЊ</a></td>
 						</tr>`);
-			$("#evPanel1 #user").append(`<option value="${user.name}">${user.name}</option>`);
-		}
-	}
+            $("#evPanel1 #user").append(`<option value="${user.name}">${user.name}</option>`);
+        }
+    }
 }
 
 function updateUser(id, form) {
-	var name = $(form).find("input[name='name']").val();
+    var name = $(form).find("input[name='name']").val();
     $.ajax({
         url: API_URL_USERS + id,
         method: 'put',
         contentType: 'application/json',
         data: JSON.stringify({name:name}),
     }).done(function(data) {
-        alert(`“спешно обновлено - ${JSON.stringify(data)}`);
+        alert(`РЈСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅРѕ - ${JSON.stringify(data)}`);
     }).fail(function( jqxhr, textStatus, error ) {
         var err = textStatus + ", " + error;
-        alert( "Oшибка обновлениЯ: " + err );
+        alert( "OС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ: " + err );
     });
 }
 
@@ -153,11 +161,11 @@ function deleteUser(id, callback) {
         url: API_URL_USERS + id,
         method: 'delete'
     }).done(function(data) {
-        alert(`“спешно удалено - ${JSON.stringify(data)}`);
+        alert(`РЈСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅРѕ - ${JSON.stringify(data)}`);
         callback();
-	}).fail(function( jqxhr, textStatus, error ) {
+    }).fail(function( jqxhr, textStatus, error ) {
         var err = textStatus + ", " + error;
-        alert( "Oшибка удалениЯ: " + err );
+        alert( "OС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: " + err );
     });
 }
 
@@ -166,21 +174,21 @@ function deleteTask(id, callback) {
         url: API_URL_TASKS + id,
         method: 'delete'
     }).done(function(data) {
-        alert(`“спешно удалена задача - ${JSON.stringify(data)}`);
+        alert(`РЈСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР° Р·Р°РґР°С‡Р° - ${JSON.stringify(data)}`);
         callback();
-	}).fail(function( jqxhr, textStatus, error ) {
+    }).fail(function( jqxhr, textStatus, error ) {
         var err = textStatus + ", " + error;
-        alert( "Oшибка удалениЯ: " + err );
+        alert( "OС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: " + err );
     });
 }
 
 function updateTask(id, form) {
-	$("#editTaskForm #id").val(id);
-	$("#editTaskForm #name").val($(form).find(".name").html());
-	$("#editTaskForm #desc").val($(form).find(".desc").html());
-	if ($(form).find(".isOpen").html() == "‡акрыта"){
-		$("#editTaskForm #open").attr("checked", "checked");
-	}
-	$("#editTaskForm #user").val($(form).find(".user").html());
-	$(".edit_task").css("display", "block");
+    $("#editTaskForm #id").val(id);
+    $("#editTaskForm #name").val($(form).find(".name").html());
+    $("#editTaskForm #desc").val($(form).find(".desc").html());
+    if ($(form).find(".isOpen").html() == "Р—Р°РєСЂС‹С‚Р°"){
+        $("#editTaskForm #open").attr("checked", "checked");
+    }
+    $("#editTaskForm #user").val($(form).find(".user").html());
+    $(".edit_task").css("display", "block");
 }
