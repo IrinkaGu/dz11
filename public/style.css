@@ -2,6 +2,17 @@ body {
 	padding:0 30px 30px 30px;
 }
 
+.content{
+	margin:0 auto;
+	width:1300px
+}
+
+.search{
+	background:#f6f6f6;
+	padding:10px 40px;
+	border-radius:10px;
+}
+
 .tab-pane{
 	padding:20px 0;
 }
@@ -15,8 +26,22 @@ body {
 #addTask{
 	cursor:pointer;
 	width:250px;
+	margin: 60px 0;
 }
 
 #addTask:hover{
 	text-decoration:underline;
+}
+
+.add_task{
+	margin-bottom: 60px;
+	background:#f6f6f6;
+	padding:20px 40px;
+	border-radius:10px;
+}
+
+.edit_task{
+	background:#f6f6f6;
+	padding:20px 40px;
+	border-radius:10px;
 }
